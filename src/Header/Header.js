@@ -102,7 +102,7 @@ function Header() {
                         <ul className="dropdown-menu">
                             <li><a className="" href="#"><i className="icofont-user"></i> Profile</a></li>
                             <li><a className="" href="#"><i className="icofont-inbox"></i> Inbox</a></li>
-                            <li><a className="" href="https//www.delzyscholars.com"><i className="icofont-logout"></i> Sign Out</a></li>
+                            <li><a className="" href="https://www.delzyscholars.com"><i className="icofont-logout"></i> Sign Out</a></li>
                         </ul>
                     </div>
                 </div>
