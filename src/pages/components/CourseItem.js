@@ -1,7 +1,7 @@
 import React from 'react'
 
 function CourseItem(props) {
-    const {img, title, earned, enrol, author, category} = props;
+    const {img, title, earned, enrol, author, category, amount} = props;
   return (
     <div className="courses-item">
         <div className="item-thumb">
@@ -13,8 +13,8 @@ function CourseItem(props) {
         <div className="content-title">
             <div className="meta">
                 <h2 className="title">{category}</h2>
-                {/* <a href="#" className="action">Free</a>
-                <a href="#" className="action">Public</a> */}
+                <a style={{paddingBottom: '1em', fontWeight: 'bold'}} href="#" className="action"> {`₦ ${amount}`} </a>
+                {/* <a href="#" className="action">Public</a> */}
             </div>
             <h3 className="title"><a href="#">{title}</a></h3>
         </div>

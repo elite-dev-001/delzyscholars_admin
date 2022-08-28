@@ -75,7 +75,7 @@ function Courses() {
                             <div className='tab-pane fade show active' id='tab1'>
                                 {
                                     courses.length === 0 ? <h1 style={{padding: '1em 0', textAlign: 'center'}}>You have no Active Courses at the Moment</h1> : courses.map((course, index) => 
-                                        <CourseItem key={index} img={course['courseImg']} title={course['title']} earned={parseFloat(course['courseAmount']) * course['students'].length} enrol={course['students'].length} author={course['author']} category={course['category']} />
+                                        <CourseItem key={index} img={course['courseImg']} title={course['title']} earned={parseFloat(course['courseAmount']) * course['students'].length} enrol={course['students'].length} author={course['author']} category={course['category']} amount={course['courseAmount']} />
                                     )
                                 }
                             </div>

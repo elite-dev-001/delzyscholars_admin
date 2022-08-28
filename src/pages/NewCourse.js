@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { SpinnerRoundFilled } from 'spinners-react';
 import { Link, useNavigate } from 'react-router-dom'
@@ -21,20 +21,87 @@ function NewCourse() {
     setLoading(true)
     data.courseImg = secureUrl;
     data.creatorId = id;
+    data.content = chapters;
     console.log(data)
 
-    axios.post('https://delzyscholarsapi.herokuapp.com/api/materials/create/material', data).then((res) => {
-      console.log(res.data)
-      window.alert('Course created successfully')
-      navigate(`/${id}`)
-    }).catch((err) => {
-      console.log(err)
+    if(chapters.length !== 0){
+        axios.post('https://delzyscholarsapi.herokuapp.com/api/materials/create/material', data).then((res) => {
+        console.log(res.data)
+        window.localStorage.removeItem('chapters')
+        window.alert('Course created successfully')
+        navigate(`/${id}`)
+      }).catch((err) => {
+        console.log(err)
+        setLoading(false)
+        setError('Could not create Course')
+      })
+    } else {
+      setError('Upload Course Content before Creating Course')
       setLoading(false)
-      setError('Could not create Course')
-    })
+    }
   }
 
   const categories = ['WAEC', 'JAMB', 'POST-UTME', 'UNIPORT', 'RSUST']
+
+  //////////////ADD CHAPTERS//////////////////////////////
+
+
+  const {
+    register: chapter,
+    handleSubmit: handleChapter
+  } = useForm()
+
+  const [fileError, setFileError] = useState('')
+  const [fileLoading, setFileLoading] = useState(false)
+  const [fileDisabled, setFileDisabled] = useState(false)
+  const [secureFileUrl, setSecureFileUrl] = useState('')
+  const [chapters, setChapters] = useState([])
+
+  const removeItem = (item) => {
+    console.log('clicked ' + item)
+    chapters.splice(item, 1)
+    setChapters(chapters) 
+    console.log(chapters)
+    window.localStorage.setItem('chapters', JSON.stringify(chapters))
+    window.location.reload()
+  }
+
+  useEffect(() => {
+    const newChapters = JSON.parse(window.localStorage.getItem('chapters')) || [];
+    console.log(newChapters)
+    setChapters(newChapters)
+  }, [])
+
+  const chapterSubmit = (data) => {
+    console.log(chapters)
+    data.material = secureFileUrl
+    console.log(data)
+    chapters.push(data)
+    console.log(chapters)
+    window.localStorage.setItem('chapters', JSON.stringify(chapters))
+    window.location.reload()
+  }
+
+  const uploadFile = (file) => {
+    setFileLoading(true)
+    setFileDisabled(true)
+    const data = new FormData();
+    data.append('file', file[0])
+    data.append('upload_preset', 'kr2j8ieg')
+    axios.post('https://api.cloudinary.com/v1_1/dziy1glm5/image/upload', data).then((res) => {
+      console.log(res.data['secure_url'])
+      setSecureFileUrl(res.data['secure_url'])
+      setFileDisabled(false)
+      setFileLoading(false)
+    }).catch((err) => {
+      console.log(err)
+      setFileLoading(false)
+      setFileDisabled(false)
+      setFileError('Somethin went wrong. Could not upload image')
+    })
+  }
+
+  ///////////////////ADD CHAPTERS////////////////////////
 
   const id = window.localStorage.getItem('id')
 
@@ -78,24 +145,51 @@ function NewCourse() {
                     <div className="col-lg-6">
 
                         {/* <!-- Register & Login Images Start --> */}
-                        <div className="register-login-images">
-                            <div className="shape-1">
-                                <img src="assets/images/shape/shape-26.png" alt="Shape" />
-                            </div>
+                        <div className="register-login-form">
+                            <h3 className="title">Create a New <span>Course</span></h3>
 
-
-                            <div className="images">
-                                <img src="https://res.cloudinary.com/dziy1glm5/image/upload/v1659554338/pexels-pixabay-261909_rulnbg.jpg" alt="Register Login" />
+                            <div className='form-wrapper'>
+                              {
+                                chapters.map((chapter, index) => <PdfCourse remove={removeItem} key={index} chapter={index+1} title={chapter['topic']} />)
+                              }
                             </div>
+                            <form onSubmit={handleChapter(chapterSubmit)}>
+                              <div className="form-wrapper">
+                                  <div style={{border: '3px solid green', borderRadius: '1em', padding: '0em 1em', margin: '1em 0'}}>
+                                      <div className='single-form'>
+                                        <input {...chapter('chapter')} type="text" value={`Chapter ${chapters.length + 1}`} readOnly />
+                                      </div>
+                                      <div className='single-form'>
+                                        <input {...chapter('topic')} type="text" placeholder='Chapter Topic' required />
+                                      </div>
+                                      <div className='single-form'>
+                                        <input onChange={(e) => uploadFile(e.target.files)} required type="file" />
+                                      </div>
+                                      <select {...chapter('status')} required className='single-form' style={{border:'1px solid rgba(48, 146, 85, 0.2',width: '100%', height: '60px', padding: '0 25px', fontSize: '15px', color: '#52565b', borderRadius: '10px', background: '#fff', transition: 'all 0.3s ease 0s'}}>
+                                        <option>Free</option>
+                                        <option>Locked</option>
+                                      </select>
+                                      <div className='single-form'>
+                                      <div className="single-form">
+                                          <button disabled={fileDisabled} style={{background: 'green', color: 'white', margin: '0'}} className="btn  w-100">{
+                                            fileLoading ? <SpinnerRoundFilled color='#ffffff' enabled={fileLoading} /> : 'Add Chapter'
+                                        }</button>
+                                        <p style={{color: 'red', textAlign: 'center', paddingTop: '.5em'}}> {fileError} </p>
+                                      </div>
+                                      </div>
+                                  </div>
+                              </div>
+                            </form>
                         </div>
                         {/* <!-- Register & Login Images End --> */}
 
                     </div>
+                    <hr />
                     <div className="col-lg-6">
 
                         {/* <!-- Register & Login Form Start --> */}
                         <div className="register-login-form">
-                            <h3 className="title">Create a New <span>Course</span></h3>
+                            {/* <h3 className="title">Create a New <span>Course</span></h3> */}
 
                             <div className="form-wrapper">
                                 <form onSubmit={handleSubmit(onSubmit)}>
@@ -158,3 +252,16 @@ function NewCourse() {
 }
 
 export default NewCourse
+
+const PdfCourse = (props) => {
+  const {chapter, title, remove} = props
+  return (
+    <div style={{border: '2px solid green', borderRadius: '1em', margin: '1em 0', display: 'flex', justifyContent: 'space-between'}}>
+      <div style={{padding: '0 .5em'}}>
+        <p style={{fontSize: '1rem', fontWeight: 'bold'}}> {` Chapter ${chapter}`} </p>
+        <p style={{color: 'green'}}> {title ? `${title.slice(0,24)}...` : title} </p>
+      </div>
+      <button onClick={() => remove(chapter-1)} style={{borderStyle: 'none', color: 'white', background: 'red', cursor: 'pointer', borderBottomRightRadius: '1em', borderTopRightRadius: '1em'}}>Remove</button>
+    </div>
+  )
+} 
