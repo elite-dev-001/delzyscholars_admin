@@ -25,7 +25,7 @@ function NewCourse() {
     console.log(data)
 
     if(chapters.length !== 0){
-        axios.post('https://delzyscholarsapi.herokuapp.com/api/materials/create/material', data).then((res) => {
+        axios.post('https://thoughtful-pullover-worm.cyclic.app/api/materials/create/material', data).then((res) => {
         console.log(res.data)
         window.localStorage.removeItem('chapters')
         window.alert('Course created successfully')
