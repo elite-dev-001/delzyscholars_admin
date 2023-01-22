@@ -55,6 +55,7 @@ function NewCourse() {
   const [fileLoading, setFileLoading] = useState(false)
   const [fileDisabled, setFileDisabled] = useState(false)
   const [secureFileUrl, setSecureFileUrl] = useState('')
+  const [secureVideoUrl, setSecureVideoUrl] = useState('')
   const [chapters, setChapters] = useState([])
 
   const removeItem = (item) => {
@@ -75,6 +76,7 @@ function NewCourse() {
   const chapterSubmit = (data) => {
     console.log(chapters)
     data.material = secureFileUrl
+    data.video = secureVideoUrl
     console.log(data)
     chapters.push(data)
     console.log(chapters)
@@ -97,7 +99,26 @@ function NewCourse() {
       console.log(err)
       setFileLoading(false)
       setFileDisabled(false)
-      setFileError('Somethin went wrong. Could not upload image')
+      setFileError('Somethin went wrong. Could not upload pdf file')
+    })
+  }
+
+  const uploadVideo = (file) => {
+    setFileLoading(true)
+    setFileDisabled(true)
+    const data = new FormData();
+    data.append('file', file[0])
+    data.append('upload_preset', 'kr2j8ieg')
+    axios.post('https://api.cloudinary.com/v1_1/dziy1glm5/video/upload', data).then((res) => {
+      console.log(res.data['secure_url'])
+      setSecureVideoUrl(res.data['secure_url'])
+      setFileDisabled(false)
+      setFileLoading(false)
+    }).catch((err) => {
+      console.log(err)
+      setFileLoading(false)
+      setFileDisabled(false)
+      setFileError('Somethin went wrong. Could not upload video file')
     })
   }
 
@@ -163,7 +184,12 @@ function NewCourse() {
                                         <input {...chapter('topic')} type="text" placeholder='Chapter Topic' required />
                                       </div>
                                       <div className='single-form'>
-                                        <input onChange={(e) => uploadFile(e.target.files)} required type="file" />
+                                        <label htmlFor='pdf' style={{color: 'red', fontWeight: 'bold', fontStyle: 'italic'}}>Upload PDF Material</label>
+                                        <input onChange={(e) => uploadFile(e.target.files)} required type="file" id='pdf' />
+                                      </div>
+                                      <div className='single-form'>
+                                        <label htmlFor='video' style={{color: 'red', fontWeight: 'bold', fontStyle: 'italic'}}>Upload Video Material</label>
+                                        <input onChange={(e) => uploadVideo(e.target.files)} required type="file" id='video' />
                                       </div>
                                       <select {...chapter('status')} required className='single-form' style={{border:'1px solid rgba(48, 146, 85, 0.2',width: '100%', height: '60px', padding: '0 25px', fontSize: '15px', color: '#52565b', borderRadius: '10px', background: '#fff', transition: 'all 0.3s ease 0s'}}>
                                         <option>Free</option>
